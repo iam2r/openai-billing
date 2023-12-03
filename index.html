@@ -365,21 +365,23 @@
   <button :class="{ loading }" :disabled="loading" onclick="sendRequest()">查询</button> </p>
 
   <h2 id="result-head" style="visibility:hidden">查询结果</h2>
-  <table id="result-table" style="visibility:hidden">
-    <thead>
-      <tr>
-        <th>API KEY</th>
-        <th style="width: 50px">总额度</th>
-        <th style="width: 50px">已使用</th>
-        <th style="width: 50px">剩余量</th>
-        <th style="width: 60px">到期时间</th>
-        <th style="width: 50px">GPT-4</th>
-        <th style="width: 50px">是否绑卡</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 
+  <div id="result-table-container" style="width: 100%;overflow-x: auto;">
+    <table id="result-table" style="visibility:hidden">
+      <thead>
+        <tr>
+          <th>API KEY</th>
+          <th>总额度</th>
+          <th>已使用</th>
+          <th>剩余量</th>
+          <th>到期时间</th>
+          <th>GPT-4</th>
+          <th>是否绑卡</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
 
   <script>
@@ -484,8 +486,7 @@
         apiUrl = apiUrlSelect.value;
       }
 
-      let apiKeys = apiKeyInput.value.split(/[,\s，\n]+/).filter(key => key.startsWith("sk-"));
-
+      let apiKeys = apiKeyInput.value.split(',');
       if (apiKeys.length === 0) {
         alert("未匹配到 API-KEY，请检查输入内容");
         return;
@@ -504,10 +505,17 @@
         queriedApiKeys.push(apiKey);
 
         checkBilling(apiKey, apiUrl).then((data) => {
+          console.log(data)
           let row = document.createElement("tr");
 
           let apiKeyCell = document.createElement("td");
-          apiKeyCell.textContent = apiKey.replace(/^(sk-[a-zA-Z0-9]{4})[a-zA-Z0-9]*(.{6})$/, "$1***$2");
+          const strList = apiKey.split('')
+          const start = 0 + 8, end = strList.length - 1 - 5
+          apiKeyCell.textContent = strList.map((it, index) => {
+            if (index > start && index < end) return ''
+            if (index === start || index === end) return '*'
+            return it
+          }).join('')
           row.appendChild(apiKeyCell);
 
           if (data[0] === "Error") {
