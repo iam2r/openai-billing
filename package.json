@@ -1,0 +1,14 @@
+{
+  "name": "openai-billing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ClarenceDan/openai-billing.git",
+  "author": "iamrazo <bestwishtous@gmail.com>",
+  "scripts": {
+    "start": "http-server"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
