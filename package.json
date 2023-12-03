@@ -5,7 +5,7 @@
   "repository": "https://github.com/ClarenceDan/openai-billing.git",
   "author": "iamrazo <bestwishtous@gmail.com>",
   "scripts": {
-    "start": "http-server"
+    "start": "http-server ./public"
   },
   "license": "MIT",
   "dependencies": {
