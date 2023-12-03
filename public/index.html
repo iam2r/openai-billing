@@ -345,13 +345,12 @@
 
 <body>
   <header>
-    <h1 class="text-3xl font-semibold text-center mb-8 text-gradient">查询 OpenAI API 余额</h1>
+    <h1 class="text-3xl font-semibold text-center mb-8 text-gradient">查询 OpenAI 账单</h1>
   </header>
 
 
   <h2>输入 API KEY</h2>
-  <p>本站不保存 KEY 信息，查询后请自行保存</p>
-  <textarea id="api-key-input" placeholder="请输入 API-KEY，必须包含 sk-,多个可直接粘贴"></textarea></p>
+  <textarea id="api-key-input" placeholder="请输入 API-KEY，多个请用英文逗号,隔开"></textarea></p>
   <!-- API链接选择框 -->
   <div class="api-url-container"></div>
   <!-- API链接选择 -->
@@ -359,7 +358,6 @@
   <p>支持自定义线路，官网线路需要魔法</p>
   <select id="api-url-select">
     <option value="https://api.openai.com.proxy.iamrazo.pro">【CloudFlare】api.openai.com.proxy.iamrazo.pro</option>
-    <!-- <option value="https://openai.1rmb.tk">【社区反代】openai.1rmb.tk</option> -->
     <option value="https://api.openai.com">【官网线路】api.openai.com</option>
     <option value="custom">自定义 ...</option>
   </select>
