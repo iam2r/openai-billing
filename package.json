@@ -1,14 +1,35 @@
 {
-  "name": "openai-billing",
+  "name": "openai-billing-app",
   "version": "1.0.0",
-  "main": "index.js",
-  "repository": "https://github.com/ClarenceDan/openai-billing.git",
-  "author": "iamrazo <bestwishtous@gmail.com>",
+  "description": "A React app for querying OpenAI billing",
   "scripts": {
-    "start": "http-server ./public"
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
+  "keywords": [
+    "React",
+    "OpenAI",
+    "billing"
+  ],
+  "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "http-server": "^14.1.1"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
