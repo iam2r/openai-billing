@@ -5,7 +5,7 @@ import "./styles/index.css";
 function App() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [apiUrlSelect, setApiUrlSelect] = useState(
-    "https://api.openai.com.proxy.iamrazo.pro",
+    "https://api.openai.com",
   );
   const [customUrlInput, setCustomUrlInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -187,9 +187,6 @@ function App() {
         value={apiUrlSelect}
         onChange={handleApiUrlChange}
       >
-        <option value="https://api.openai.com.proxy.iamrazo.pro">
-          【CloudFlare】api.openai.com.proxy.iamrazo.pro
-        </option>
         <option value="https://api.openai.com">
           【官网线路】api.openai.com
         </option>
