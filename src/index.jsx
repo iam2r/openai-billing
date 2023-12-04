@@ -11,6 +11,22 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState([]);
 
+  const urlList = [{
+    name: '【vecel反代线路】',
+    value: 'https://proxy.iamrazo.pro/api.openai.com',
+
+  },
+  {
+    name: '【官网线路】',
+    value: 'https://api.openai.com',
+
+  },
+  {
+    name: '自定义 ...',
+    value: 'custom',
+
+  }]
+
   const handleApiKeyChange = (event) => {
     setApiKeyInput(event.target.value);
   };
@@ -187,10 +203,9 @@ function App() {
         value={apiUrlSelect}
         onChange={handleApiUrlChange}
       >
-        <option value="https://api.openai.com">
-          【官网线路】api.openai.com
-        </option>
-        <option value="custom">自定义 ...</option>
+        {
+          urlList.map(({ name, value }) => <option value={value}>{name}</option>)
+        }
       </select>
       {apiUrlSelect === "custom" && (
         <input
