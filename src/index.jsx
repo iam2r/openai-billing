@@ -3,21 +3,20 @@ import ReactDOM from "react-dom";
 import "./styles/index.css";
 
 function App() {
-  const urlList = [{
-    name: '【vecel反代线路】',
-    value: 'https://proxy.iamrazo.pro/api.openai.com',
+  const urlList = [
+    {
+      name: '【官网线路】',
+      value: 'https://api.openai.com',
+    },
+    {
+      name: '【vecel反代线路】',
+      value: 'https://proxy.iamrazo.pro/api.openai.com',
+    },
+    {
+      name: '自定义 ...',
+      value: 'custom',
 
-  },
-  {
-    name: '【官网线路】',
-    value: 'https://api.openai.com',
-
-  },
-  {
-    name: '自定义 ...',
-    value: 'custom',
-
-  }]
+    }]
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [apiUrlSelect, setApiUrlSelect] = useState(
     urlList[0].value,
