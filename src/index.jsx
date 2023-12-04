@@ -3,14 +3,6 @@ import ReactDOM from "react-dom";
 import "./styles/index.css";
 
 function App() {
-  const [apiKeyInput, setApiKeyInput] = useState("");
-  const [apiUrlSelect, setApiUrlSelect] = useState(
-    "https://api.openai.com",
-  );
-  const [customUrlInput, setCustomUrlInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState([]);
-
   const urlList = [{
     name: '【vecel反代线路】',
     value: 'https://proxy.iamrazo.pro/api.openai.com',
@@ -26,6 +18,15 @@ function App() {
     value: 'custom',
 
   }]
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [apiUrlSelect, setApiUrlSelect] = useState(
+    urlList[0].value,
+  );
+  const [customUrlInput, setCustomUrlInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState([]);
+
+
 
   const handleApiKeyChange = (event) => {
     setApiKeyInput(event.target.value);
