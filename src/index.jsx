@@ -5,27 +5,23 @@ import "./styles/index.css";
 function App() {
   const urlList = [
     {
-      name: '【官网线路】',
-      value: 'https://api.openai.com',
+      name: "【vecel反代线路】",
+      value: "https://proxy.vercel.iamrazo.pro/api.openai.com",
     },
     {
-      name: '【vecel反代线路】',
-      value: 'https://proxy.iamrazo.pro/api.openai.com',
+      name: "【官网线路】",
+      value: "https://api.openai.com",
     },
     {
-      name: '自定义 ...',
-      value: 'custom',
-
-    }]
+      name: "自定义 ...",
+      value: "custom",
+    },
+  ];
   const [apiKeyInput, setApiKeyInput] = useState("");
-  const [apiUrlSelect, setApiUrlSelect] = useState(
-    urlList[0].value,
-  );
+  const [apiUrlSelect, setApiUrlSelect] = useState(urlList[0].value);
   const [customUrlInput, setCustomUrlInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState([]);
-
-
 
   const handleApiKeyChange = (event) => {
     setApiKeyInput(event.target.value);
@@ -203,9 +199,9 @@ function App() {
         value={apiUrlSelect}
         onChange={handleApiUrlChange}
       >
-        {
-          urlList.map(({ name, value }) => <option value={value}>{name}</option>)
-        }
+        {urlList.map(({ name, value }) => (
+          <option value={value}>{name}</option>
+        ))}
       </select>
       {apiUrlSelect === "custom" && (
         <input
