@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenAI Billing</title>
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafa">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#fafafa">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="OpenAI Billing">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="/index.css">
+    <script src="/serviceWorkerRegister.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script>
+        $(document).ready(function () {
+            // 初始化状态
+            var urlList = [
+                {
+                    name: "【vecel反代线路】",
+                    value: "https://proxy.vercel.iamrazo.pro/api.openai.com",
+                },
+                {
+                    name: "【官网线路】",
+                    value: "https://api.openai.com",
+                },
+                {
+                    name: "自定义 ...",
+                    value: "custom",
+                },
+            ];
+            var apiKeyInput = "sess-trdTXEzS6xUyYgMiIabKwZ9M9Gpc8NDxrdYmPdNA";
+            var apiUrlSelect = urlList[0].value;
+            var customUrlInput = "";
+            var loading = false;
+            var result = [];
+
+            function bindEvent() {
+                // 监听 API KEY 输入框的变化
+                $("#api-key-input").on("input", function () {
+                    apiKeyInput = $(this).val();
+                });
+
+                // 监听 API URL 选择框的变化
+                $("#api-url-select").change(function () {
+                    apiUrlSelect = $(this).val();
+                    if (apiUrlSelect === "custom") {
+                        $("#custom-url-input").show();
+                    } else {
+                        $("#custom-url-input").hide();
+                    }
+                });
+
+                // 监听自定义 URL 输入框的变化
+                $("#custom-url-input").on("input", function () {
+                    customUrlInput = $(this).val();
+                });
+
+                // 监听查询按钮的点击事件
+                $("#query-button").click(function () {
+                    sendRequest();
+                });
+
+            }
+            // 发送请求
+            function sendRequest() {
+                setLoading(true);
+                setResult([]);
+
+                if (apiKeyInput.trim() === "") {
+                    alert("请填写API KEY");
+                    setLoading(false);
+                    return;
+                }
+
+                var apiUrl = "";
+                if (apiUrlSelect === "custom") {
+                    if (customUrlInput.trim() === "") {
+                        alert("请设置API链接");
+                        setLoading(false);
+                        return;
+                    } else {
+                        apiUrl = customUrlInput.trim();
+                        if (!apiUrl.startsWith("http://") && !apiUrl.startsWith("https://")) {
+                            apiUrl = "https://" + apiUrl;
+                        }
+                    }
+                } else {
+                    apiUrl = apiUrlSelect;
+                }
+
+                var apiKeys = apiKeyInput.split(",");
+                if (apiKeys.length === 0) {
+                    alert("未匹配到 API-KEY，请检查输入内容");
+                    setLoading(false);
+                    return;
+                }
+
+                alert("成功匹配到 API Key，确认后开始查询：" + apiKeys);
+
+                // 逐个查询 API KEY
+                var promises = apiKeys.map(function (apiKey) {
+                    return checkBilling(apiKey, apiUrl).catch(function () {
+                        // 错误处理
+                    });
+                });
+
+                // 并行执行所有查询
+                $.when.apply($, promises)
+                    .then(function () {
+                        var queriedApiKeys = Array.from(arguments);
+                        setResult(queriedApiKeys.filter(Boolean));
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    })
+                    .always(function () {
+                        setLoading(false);
+                    });
+            }
+
+            // 查询账单
+            function checkBilling(apiKey, apiUrl) {
+                var now = new Date();
+                var startDate = new Date(now - 90 * 24 * 60 * 60 * 1000);
+                var endDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                var subDate = new Date(now);
+                subDate.setDate(1);
+
+                var headers = {
+                    Authorization: "Bearer " + apiKey,
+                    "Content-Type": "application/json",
+                };
+                var gpt4Check = apiUrl + "/v1/models";
+                var urlSubscription = apiUrl + "/v1/dashboard/billing/subscription";
+                var urlUsage =
+                    apiUrl +
+                    "/v1/dashboard/billing/usage?start_date=" +
+                    formatDate(startDate) +
+                    "&end_date=" +
+                    formatDate(endDate);
+
+                return $.ajax({
+                    url: urlSubscription,
+                    headers: headers,
+                    method: "GET",
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            return {
+                                apiKey: apiKey,
+                                error: "APIKEY 错误或账号被封，请登录 OpenAI 查看。",
+                            };
+                        }
+
+                        var currentDate = new Date();
+                        var subscriptionData = response;
+                        var totalAmount = subscriptionData.system_hard_limit_usd;
+                        var expiryDate = new Date(
+                            subscriptionData.access_until * 1000 + 8 * 60 * 60 * 1000
+                        );
+                        var formattedDate =
+                            expiryDate.getFullYear() +
+                            "-" +
+                            (expiryDate.getMonth() + 1).toString().padStart(2, "0") +
+                            "-" +
+                            expiryDate.getDate().toString().padStart(2, "0");
+
+                        return $.ajax({
+                            url: gpt4Check,
+                            headers: headers,
+                            method: "GET",
+                        }).then(function (gpt4CheckResponse) {
+                            var gpt4CheckData = gpt4CheckResponse;
+                            var isGPT4 =
+                                Array.isArray(gpt4CheckData.data) &&
+                                gpt4CheckData.data.some(function (item) {
+                                    return item.id.includes("gpt-4");
+                                });
+                            var isSubscrible = subscriptionData.plan.id.includes("payg");
+
+                            if (totalAmount > 20) {
+                                urlUsage =
+                                    apiUrl +
+                                    "/v1/dashboard/billing/usage?start_date=" +
+                                    formatDate(subDate) +
+                                    "&end_date=" +
+                                    formatDate(endDate);
+                            }
+
+                            return $.ajax({
+                                url: urlUsage,
+                                headers: headers,
+                                method: "GET",
+                            }).then(function (usageResponse) {
+                                var usageData = usageResponse;
+                                var totalUsage = usageData.total_usage / 100;
+                                var remaining =
+                                    subscriptionData.system_hard_limit_usd - totalUsage;
+                                var isExpired = currentDate > expiryDate;
+
+                                return {
+                                    apiKey: apiKey,
+                                    totalAmount: totalAmount,
+                                    totalUsage: totalUsage,
+                                    remaining: remaining,
+                                    formattedDate: formattedDate,
+                                    isExpired: isExpired,
+                                    isGPT4: isGPT4,
+                                    isSubscrible: isSubscrible,
+                                };
+                            });
+                        });
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            }
+
+            // 格式化日期
+            function formatDate(date) {
+                var year = date.getFullYear();
+                var month = (date.getMonth() + 1).toString().padStart(2, "0");
+                var day = date.getDate().toString().padStart(2, "0");
+
+                return year + "-" + month + "-" + day;
+            }
+
+            // 遮盖 API KEY
+            function maskAPIKey(apiKey) {
+                var strList = apiKey.split("");
+                var start = 0 + 8;
+                var end = Math.max(strList.length - 1 - 5, start);
+
+                return strList
+                    .map(function (it, index) {
+                        if (index > start && index < end) return "";
+                        if (index === start || index === end) return "*";
+                        return it;
+                    })
+                    .join("");
+            }
+
+            // 设置加载状态
+            function setLoading(isLoading) {
+                loading = isLoading;
+                if (loading) {
+                    $("#query-button").addClass("loading").attr("disabled", true);
+                } else {
+                    $("#query-button").removeClass("loading").attr("disabled", false);
+                }
+            }
+
+            // 设置查询结果
+            function setResult(data) {
+                result = data;
+                if (result.length > 0) {
+                    $("#result-head").show();
+                    $("#result-table-container").show();
+
+                    var tableBody = $("#result-table tbody");
+                    tableBody.empty();
+
+                    result.forEach(function (item, index) {
+                        if (item.error) {
+                            tableBody.append(
+                                $("<tr>").append(
+                                    $("<td>").text(maskAPIKey(item.apiKey)),
+                                    $("<td>").attr("colspan", 6).text(item.error)
+                                )
+                            );
+                        } else {
+                            tableBody.append(
+                                $("<tr>").append(
+                                    $("<td>").text(maskAPIKey(item.apiKey)),
+                                    $("<td>").text(item.totalAmount.toFixed(2)),
+                                    $("<td>").text(item.totalUsage.toFixed(2)),
+                                    $("<td>").text(item.remaining.toFixed(2)),
+                                    $("<td>").text(
+                                        item.formattedDate +
+                                        " " +
+                                        (item.isExpired ? "(🔴)" : "(🟢)")
+                                    ),
+                                    $("<td>").text(item.isGPT4 ? "✅" : "❌"),
+                                    $("<td>").text(item.isSubscrible ? "🟢" : "🔴")
+                                )
+                            );
+                        }
+                    });
+                } else {
+                    $("#result-head").hide();
+                    $("#result-table-container").hide();
+                }
+            }
+
+            // 渲染页面
+            function render() {
+                var rootElement = $("#root");
+                rootElement.empty();
+
+                var header = $("<header>").append(
+                    $("<h1>")
+                        .addClass("text-3xl font-semibold text-center mb-8 text-gradient")
+                        .text("查询 OpenAI 账单")
+                );
+
+                var apiKeyInput = $("<textarea>")
+                    .attr("id", "api-key-input")
+                    .attr("placeholder", "请输入 API-KEY，多个请用英文逗号,隔开");
+
+                var apiUrlSelect = $("<select>")
+                    .attr("id", "api-url-select")
+                    .change(function () {
+                        handleApiUrlChange();
+                    });
+
+                urlList.forEach(function (item) {
+                    apiUrlSelect.append($("<option>").val(item.value).text(item.name));
+                });
+
+                var customUrlInput = $("<input>")
+                    .attr("type", "text")
+                    .attr("id", "custom-url-input")
+                    .attr("placeholder", "输入自定义API，默认使用 https 协议")
+                    .hide();
+
+                var queryButton = $("<button>")
+                    .attr("id", "query-button")
+                    .text("查询")
+                 
+
+                var resultHead = $("<h2>").attr("id", "result-head").hide().text("查询结果");
+
+                var resultTableContainer = $("<div>")
+                    .attr("id", "result-table-container")
+                    .css({ width: "100%", overflowX: "auto" })
+                    .hide();
+
+                var resultTable = $("<table>").attr("id", "result-table");
+
+                var tableHead = $("<thead>").append(
+                    $("<tr>").append(
+                        $("<th>").text("API KEY"),
+                        $("<th>").text("总额度"),
+                        $("<th>").text("已使用"),
+                        $("<th>").text("剩余量"),
+                        $("<th>").text("到期时间"),
+                        $("<th>").text("GPT-4"),
+                        $("<th>").text("是否绑卡")
+                    )
+                );
+
+                var tableBody = $("<tbody>");
+
+                resultTable.append(tableHead, tableBody);
+                resultTableContainer.append(resultTable);
+
+                rootElement.append(
+                    header,
+                    $("<h2>").text("输入 API KEY"),
+                    apiKeyInput,
+                    $("<h2>").text("选择查询线路"),
+                    $("<p>").text("支持自定义线路"),
+                    apiUrlSelect,
+                    customUrlInput,
+                    queryButton,
+                    resultHead,
+                    resultTableContainer
+                );
+            }
+
+            // 监听 API URL 选择框的变化
+            function handleApiUrlChange() {
+                apiUrlSelect = $("#api-url-select").val();
+                if (apiUrlSelect === "custom") {
+                    $("#custom-url-input").show();
+                } else {
+                    $("#custom-url-input").hide();
+                }
+            }
+
+            render();
+
+            bindEvent()
+        });
+    </script>
+</body>
+
+</html>

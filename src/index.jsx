@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import "./styles/index.css";
 
 function App() {
   const urlList = [
